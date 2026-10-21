@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060d" />
+  <title>STREET REQUIEM — Neon City Mayhem</title>
+  <meta name="description" content="A 3D neon beat 'em up with stylish combos, ten fighters, local and online co-op, survival roguelike, boss rush, and more." />
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" aria-label="Street Requiem game view"></canvas>
+    <video id="guest-video" playsinline muted></video>
+
+    <div id="atmosphere" aria-hidden="true">
+      <div class="scanlines"></div>
+      <div class="vignette"></div>
+      <div class="grain"></div>
+    </div>
+    <div id="screen-flash" aria-hidden="true"></div>
+
+    <div id="ui">
+      <section id="screen-title" class="screen active">
+        <div class="title-top">
+          <span class="eyebrow">AN OMG ORIGINAL // 2087</span>
+          <div class="title-actions">
+            <button class="icon-btn" id="btn-audio-title" title="Toggle audio" aria-label="Toggle audio">♪</button>
+            <button class="icon-btn" id="btn-help-title" title="How to play" aria-label="How to play">?</button>
+          </div>
+        </div>
+        <div class="title-copy">
+          <div class="kicker"><span></span> NEON CITY MAYHEM</div>
+          <h1 class="logo">
+            <span class="logo-street" data-text="STREET">STREET</span>
+            <span class="logo-requiem" data-text="REQUIEM">REQUIEM</span>
+          </h1>
+          <p class="title-blurb">The syndicate killed the city.<br/>You are the encore.</p>
+          <div class="title-buttons">
+            <button class="btn btn-primary btn-xl" id="btn-enter">ENTER THE CITY <span>→</span></button>
+            <button class="btn btn-ghost" id="btn-help">HOW TO PLAY</button>
+          </div>
+          <div class="title-meta">
+            <span><b>10</b> FIGHTERS</span>
+            <span><b>4P</b> LOCAL CO-OP</span>
+            <span><b>∞</b> REPLAYABILITY</span>
+          </div>
+        </div>
+        <div class="save-chip" id="title-save"><span class="shard">◆</span><b id="title-shards">0</b><em>SOUL SHARDS</em></div>
+        <div class="title-bottom">
+          <span>BUILD 1.0.0</span>
+          <span>STYLE IS SURVIVAL</span>
+          <span>◉ AUDIO REACTIVE</span>
+        </div>
+      </section>
+
+      <section id="screen-hub" class="screen">
+        <div class="hub-shell">
+          <header class="hub-head">
+            <div class="hub-brand">
+              <span class="brand-mark">SR</span>
+              <div><h2>COMMAND</h2><p>NEON CITY // 02:14 AM</p></div>
+            </div>
+            <nav class="hub-nav">
+              <button class="nav-link active" data-hub="modes">MODES</button>
+              <button class="nav-link" data-hub="roster">ROSTER</button>
+              <button class="nav-link" data-hub="skills">SKILLS</button>
+              <button class="nav-link" data-hub="online">CO-OP</button>
+            </nav>
+            <div class="hub-wallet"><span class="shard">◆</span><b id="hub-shards">0</b><span class="wallet-label">SHARDS</span></div>
+          </header>
+          <div class="hub-main">
+            <div class="hub-list-head">
+              <div><span class="eyebrow">SELECT CONTRACT</span><h2>ONE NIGHT. NO RULES.</h2></div>
+              <div class="hub-record"><span>RECORD</span><b id="hub-record">0</b></div>
+            </div>
+            <div id="mode-list" class="mode-list"></div>
+            <div class="hub-foot">
+              <button class="btn btn-ghost" id="btn-hub-help">CONTROLS</button>
+              <button class="btn btn-ghost" id="btn-hub-title">← TITLE</button>
+              <span class="hub-tip">TIP // STYLE RANK MULTIPLIES DAMAGE. NEVER DROP THE BEAT.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-roster" class="screen">
+        <div class="roster-shell">
+          <header class="sub-head">
+            <button class="back-btn" id="btn-roster-back">←</button>
+            <div><span class="eyebrow" id="roster-mode-label">STORY // CITY OF SINS</span><h2>CHOOSE YOUR WEAPON</h2></div>
+            <div class="hub-wallet"><span class="shard">◆</span><b id="roster-shards">0</b></div>
+          </header>
+          <div class="roster-layout">
+            <div class="roster-grid" id="roster-grid"></div>
+            <aside class="fighter-panel" id="fighter-panel">
+              <div class="fighter-index" id="fighter-index">01</div>
+              <div class="fighter-art" id="fighter-art">
+                <div class="fighter-initial" id="fighter-initial">R</div>
+                <div class="fighter-scan"></div>
+                <div class="fighter-tag" id="fighter-tag">THE LAST BRUISER</div>
+              </div>
+              <div class="fighter-copy">
+                <div class="fighter-name-row">
+                  <h2 id="fighter-name">ROOK</h2>
+                  <span class="fighter-role" id="fighter-role">BALANCED BRAWLER</span>
+                </div>
+                <p id="fighter-desc"></p>
+                <div class="stat-bars" id="fighter-stats"></div>
+                <div class="fighter-special">
+                  <span>SIGNATURE</span><b id="fighter-ultimate">SEISMIC VERDICT</b>
+                  <em id="fighter-combo">CONCRETE LITANY</em>
+                </div>
+                <div class="fighter-perk" id="fighter-perk">
+                  <span>UNLOCK PERK</span><b id="fighter-perk-name">SEISMIC FIST</b>
+                  <em id="fighter-perk-desc">Ground shockwaves hit 40% harder.</em>
+                </div>
+                <div class="fighter-actions">
+                  <button class="btn btn-primary" id="btn-launch">DEPLOY <span>→</span></button>
+                  <button class="btn btn-ghost" id="btn-skills">SKILLS</button>
+                  <button class="btn btn-ghost" id="btn-roster-training" hidden>TRAINING SETTINGS</button>
+                </div>
+              </div>
+            </aside>
+          </div>
+          <div class="squad-bar">
+            <div class="squad-label"><span>LOCAL SQUAD</span><b>1—4 PLAYERS</b></div>
+            <div class="squad-slots" id="squad-slots"></div>
+            <div class="squad-actions">
+              <button class="btn btn-ghost btn-small" id="btn-online">◉ ONLINE CO-OP</button>
+              <button class="btn btn-primary btn-small" id="btn-launch-2">LAUNCH</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-skills" class="screen">
+        <div class="skills-shell">
+          <header class="sub-head">
+            <button class="back-btn" id="btn-skills-back">←</button>
+            <div><span class="eyebrow">PROGRESSION // SOUL SHARDS</span><h2>MASTER THE FIGHT</h2></div>
+            <div class="hub-wallet"><span class="shard">◆</span><b id="skills-shards">0</b></div>
+          </header>
+          <div class="skills-layout">
+            <aside class="skills-hero">
+              <div class="skills-art" id="skills-art"><span id="skills-initial">R</span></div>
+              <h2 id="skills-name">ROOK</h2>
+              <p id="skills-role">BALANCED BRAWLER</p>
+              <div class="skills-chips" id="skills-chips"></div>
+            </aside>
+            <div class="skills-cards" id="skills-cards"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-online" class="screen">
+        <div class="online-shell">
+          <header class="sub-head">
+            <button class="back-btn" id="btn-online-back">←</button>
+            <div><span class="eyebrow">NETWORK // PEER TO PEER</span><h2>CO-OP LOBBY</h2></div>
+            <div class="online-status" id="online-status"><span></span> OFFLINE</div>
+          </header>
+          <div class="online-layout">
+            <div class="online-tabs">
+              <button class="online-tab active" data-online="host">HOST A ROOM</button>
+              <button class="online-tab" data-online="join">JOIN A ROOM</button>
+            </div>
+            <div class="online-panel" id="online-host">
+              <span class="eyebrow">HOST</span>
+              <h3>OPEN THE FREQUENCY</h3>
+              <p>Create a room and share the four-letter code. Up to three fighters can join your run. You control P1; guests control P2–P4.</p>
+              <button class="btn btn-primary" id="btn-host-room">CREATE ROOM</button>
+              <div class="room-code-wrap" id="room-code-wrap" hidden>
+                <span>ROOM CODE</span>
+                <div class="room-code" id="room-code">----</div>
+                <div class="room-note">Tell your squad to choose <b>JOIN A ROOM</b> and enter this code.</div>
+                <div class="join-list" id="join-list"></div>
+                <button class="btn btn-primary btn-wide" id="btn-online-start" disabled>WAITING FOR SQUAD…</button>
+              </div>
+              <div class="online-meta">RUN MODE: <b id="online-mode-name">STORY</b> · P1: <b id="online-host-char">ROOK</b></div>
+            </div>
+            <div class="online-panel" id="online-join" hidden>
+              <span class="eyebrow">JOIN</span>
+              <h3>ENTER THE FREQUENCY</h3>
+              <p>Receive a four-letter code from the host. Your inputs go to the host; the host streams the fight back to you.</p>
+              <div class="join-form">
+                <input id="join-code" class="code-input" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false" />
+                <button class="btn btn-primary" id="btn-join-room">CONNECT</button>
+              </div>
+              <div class="online-note" id="join-note">PEER-TO-PEER · NO ACCOUNT NEEDED</div>
+            </div>
+            <aside class="online-side">
+              <span class="eyebrow">HOW IT WORKS</span>
+              <ol>
+                <li><b>01</b> Host creates a room.</li>
+                <li><b>02</b> Guests join with the code.</li>
+                <li><b>03</b> Host starts the run.</li>
+              </ol>
+              <div class="online-warning">Online co-op uses the public PeerJS relay for matchmaking. For four-player online, each guest joins with the same code.</div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="hud" hidden>
+      <div class="hud-top-left">
+        <div id="player-panels" class="player-panels"></div>
+      </div>
+      <div class="hud-top-center">
+        <div id="objective" class="objective">
+          <span id="objective-title">NEON MILE</span>
+          <b id="objective-sub">DOWNTOWN // SECTOR 07</b>
+        </div>
+        <div id="boss-bar" class="boss-bar" hidden>
+          <div class="boss-head"><span id="boss-title">THE CURB</span><b id="boss-name">BRUTUS</b><em id="boss-hp-text">100%</em></div>
+          <div class="boss-track"><i id="boss-fill"></i><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <div class="hud-top-right">
+        <div class="run-stat"><span>SCORE</span><b id="hud-score">000000</b></div>
+        <div class="run-stat"><span>SHARDS</span><b id="hud-shards">+0</b></div>
+        <div class="run-stat run-wave"><span id="hud-mode">STORY</span><b id="hud-wave">WAVE 1</b></div>
+      </div>
+      <div class="hud-bottom-left">
+        <div class="controls-strip" id="controls-strip">
+          <span><kbd>WASD</kbd> MOVE</span>
+          <span><kbd>J</kbd> LIGHT</span>
+          <span><kbd>K</kbd> HEAVY</span>
+          <span><kbd>L</kbd> LAUNCH</span>
+          <span><kbd>SPACE</kbd> DODGE</span>
+          <span><kbd>I</kbd> JUMP</span>
+          <span><kbd>E</kbd> SPECIAL</span>
+          <span><kbd>U</kbd> TAUNT</span>
+        </div>
+      </div>
+      <div class="hud-bottom-right">
+        <div id="style-label" class="style-label">STYLE</div>
+        <div id="style-rank" class="style-rank" data-rank="D">D</div>
+        <div class="style-track"><i id="style-fill"></i></div>
+        <div id="combo-counter" class="combo-counter"><b id="combo-value">0</b><span>HITS</span></div>
+      </div>
+      <div id="special-cinema" class="special-cinema" hidden>
+        <span>OVERDRIVE</span><b id="special-name">SEISMIC VERDICT</b>
+      </div>
+      <div id="coop-indicator" class="coop-indicator">SQUAD LINK ACTIVE</div>
+    </div>
+
+    <div id="announcer" class="announcer" aria-live="polite">
+      <span id="announce-kicker"></span>
+      <b id="announce-main"></b>
+      <em id="announce-sub"></em>
+    </div>
+    <div id="milestone" class="milestone"><b id="milestone-value">10</b><span>HIT STREAK</span></div>
+    <div id="damage-layer" class="damage-layer" aria-hidden="true"></div>
+    <div id="toast" class="toast"></div>
+    <div id="hurt-vignette" aria-hidden="true"></div>
+    <div class="cinema-vignette" aria-hidden="true"></div>
+
+    <section id="screen-pause" class="modal-screen">
+      <div class="modal-card pause-card">
+        <span class="eyebrow">SYSTEM // PAUSED</span>
+        <h2>HOLD THE LINE</h2>
+        <p class="modal-copy">The city can wait. Your combo cannot.</p>
+        <div class="pause-menu">
+          <button class="btn btn-primary" id="btn-resume">RESUME</button>
+          <button class="btn btn-ghost" id="btn-pause-training" hidden>TRAINING SETTINGS</button>
+          <button class="btn btn-ghost" id="btn-pause-controls">CONTROLS</button>
+          <button class="btn btn-ghost" id="btn-pause-restart">RESTART RUN</button>
+          <button class="btn btn-ghost" id="btn-pause-quit">QUIT TO COMMAND</button>
+        </div>
+        <div class="pause-meta"><span id="pause-mode">STORY</span><span id="pause-progress">WAVE 1</span><span>ESC / START TO RESUME</span></div>
+      </div>
+    </section>
+
+    <section id="screen-training" class="modal-screen">
+      <div class="training-card">
+        <span class="eyebrow">THE LAB // CONFIGURATION</span>
+        <h2>TRAINING MENU</h2>
+        <p class="modal-copy">Dummies walk, swing back, and can be juggled. Tune the lab, then break the combo counter.</p>
+        <div class="training-cols">
+          <div class="training-col">
+            <h3><span class="dot p1"></span>PLAYER</h3>
+            <div id="training-player-opts" class="training-opts"></div>
+          </div>
+          <div class="training-col">
+            <h3><span class="dot p2"></span>DUMMY</h3>
+            <div id="training-dummy-opts" class="training-opts"></div>
+          </div>
+        </div>
+        <div class="training-foot">
+          <div class="training-foot-left">
+            <button class="btn btn-ghost btn-small" id="btn-training-reset">RESET DUMMIES</button>
+            <span class="training-note">OPEN IN-GAME WITH <kbd>T</kbd></span>
+          </div>
+          <button class="btn btn-primary btn-small" id="btn-training-close">BACK TO THE LAB <span>→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-unlock" class="modal-screen">
+      <div class="unlock-card">
+        <span class="eyebrow">NEW FIGHTER // SIGNATURE UNLOCKED</span>
+        <div class="unlock-figure"><span id="unlock-initial">J</span><i class="unlock-scan"></i></div>
+        <h2 id="unlock-name">JETT</h2>
+        <p id="unlock-title" class="unlock-title">STATIC COWBOY</p>
+        <div class="unlock-perk">
+          <span>SIGNATURE PERK</span>
+          <b id="unlock-perk-name">DEAD AIR</b>
+          <em id="unlock-perk-desc">Juggle launches send enemies 30% higher.</em>
+        </div>
+        <div class="unlock-gift">
+          <span>FREE SKILL</span><b id="unlock-skill">WIND STEP</b>
+        </div>
+        <button class="btn btn-primary" id="btn-unlock-ok">WELCOME TO THE FIGHT <span>→</span></button>
+      </div>
+    </section>
+
+    <section id="screen-upgrade" class="modal-screen">
+      <div class="upgrade-card">
+        <span class="eyebrow">SURVIVAL // POWER DRAFT</span>
+        <h2>ABSORB A SOUL</h2>
+        <p>Each choice is permanent for this run. Stack them. Break the game.</p>
+        <div id="upgrade-choices" class="upgrade-choices"></div>
+        <div class="upgrade-foot">CHOOSE ONE <span>THE WAVE IS WAITING</span></div>
+      </div>
+    </section>
+
+    <section id="screen-results" class="modal-screen">
+      <div class="results-card">
+        <div class="results-rank"><span>RANK</span><b id="results-rank">S</b></div>
+        <div class="results-head">
+          <span class="eyebrow" id="results-kicker">RUN COMPLETE</span>
+          <h2 id="results-title">CITY CLEARED</h2>
+          <p id="results-sub">The night belongs to you.</p>
+        </div>
+        <div class="results-grid">
+          <div><span>SCORE</span><b id="results-score">0</b></div>
+          <div><span>MAX COMBO</span><b id="results-combo">0</b></div>
+          <div><span>ELIMINATIONS</span><b id="results-kills">0</b></div>
+          <div><span>SHARDS EARNED</span><b id="results-shards">0</b></div>
+        </div>
+        <div class="results-players" id="results-players"></div>
+        <div class="results-actions">
+          <button class="btn btn-primary" id="btn-results-next" hidden>NEXT DISTRICT <span>→</span></button>
+          <button class="btn btn-primary" id="btn-results-again">RUN IT BACK</button>
+          <button class="btn btn-ghost" id="btn-results-menu">COMMAND</button>
+        </div>
+        <div class="results-note" id="results-note"></div>
+      </div>
+    </section>
+
+    <section id="screen-help" class="modal-screen">
+      <div class="help-card">
+        <header>
+          <div><span class="eyebrow">FIELD MANUAL // COMBAT</span><h2>STYLE IS SURVIVAL</h2></div>
+          <button class="icon-btn" id="btn-help-close">×</button>
+        </header>
+        <div class="help-grid">
+          <div class="help-controls">
+            <h3>P1 KEYBOARD</h3>
+            <div class="keyrow"><kbd>W A S D</kbd><span>MOVE / WEAVE</span></div>
+            <div class="keyrow"><kbd>J</kbd><span>LIGHT — CHAIN 4 HITS <em>DOWN IN AIR = DIVE</em></span></div>
+            <div class="keyrow"><kbd>K</kbd><span>HEAVY — STAGGER / FINISH</span></div>
+            <div class="keyrow"><kbd>L</kbd><span>LAUNCHER — START A JUGGLE</span></div>
+            <div class="keyrow"><kbd>JETT</kbd><span>L FIRES THE DESERT EAGLE — KICKS JUGGLE</span></div>
+            <div class="keyrow"><kbd>SABLE</kbd><span>K = REVOLVER <em>L = REV UP</em></span></div>
+            <div class="keyrow"><kbd>VEX</kbd><span>L = CRIMSON WEAVE <em>4TH HIT = BLINK</em></span></div>
+            <div class="keyrow"><kbd>SPACE</kbd><span>DODGE — CANCEL ATTACKS</span></div>
+            <div class="keyrow"><kbd>I</kbd><span>JUMP — CANCEL ANY ATTACK INTO A JUMP</span></div>
+            <div class="keyrow"><kbd>E</kbd><span>SPECIAL — 100 METER</span></div>
+            <div class="keyrow"><kbd>U</kbd><span>TAUNT — STYLE GAIN</span></div>
+            <div class="keyrow"><kbd>ESC</kbd><span>PAUSE</span></div>
+            <h3 style="margin-top:22px">P2 KEYBOARD</h3>
+            <div class="keyrow"><kbd>ARROWS</kbd><span>MOVE</span></div>
+            <div class="keyrow"><kbd>NUM 1 / 2 / 3 / 0 / 5</kbd><span>LIGHT / HEAVY / LAUNCH / DODGE / JUMP</span></div>
+            <div class="keyrow"><kbd>NUM . / +</kbd><span>SPECIAL / TAUNT</span></div>
+            <h3 style="margin-top:22px"><span id="pad-label">GAMEPAD</span> // P1–P4</h3>
+            <div class="keyrow"><kbd id="pad-kbd-move">L-STICK</kbd><span>MOVE / MENU NAVIGATION</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-light">A</kbd><span>LIGHT / CONFIRM</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-heavy">B</kbd><span>HEAVY / BACK</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-launch">X</kbd><span>LAUNCH</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-dodge">LB</kbd><span>DODGE</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-jump">RB</kbd><span>JUMP</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-special">Y</kbd><span>SPECIAL — 100 METER</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-taunt">L3</kbd><span>TAUNT</span></div>
+            <div class="keyrow"><kbd id="pad-kbd-pause">MENU</kbd><span>PAUSE / RESUME</span></div>
+            <div class="keyrow"><kbd>RT / LT</kbd><span>HEAVY / DODGE ALTERNATES</span></div>
+            <div class="keyrow"><kbd>HAPTICS</kbd><span>DUAL-RUMBLE + TRIGGER-RUMBLE WHERE SUPPORTED</span></div>
+          </div>
+          <div class="help-notes">
+            <h3>THE LOOP</h3>
+            <p><b>LIGHT ×4</b> builds the hit chain. <b>HEAVY</b> cancels into a stagger. <b>LAUNCHER</b> pops enemies up, then jump and keep hitting. <b>DODGE</b> cancels almost anything.</p>
+            <p>Style Rank climbs from <b>D</b> to <b>SSS</b>. Higher ranks mean more damage, more shards, and more swagger. Taking a hit cuts your style. Taunting buys you a little back.</p>
+            <h3>UNLOCK</h3>
+            <p>Every run earns <b>Soul Shards</b>. Spend them in the Roster to unlock six additional fighters, or in Skills to permanently empower each character.</p>
+            <h3>MODES</h3>
+            <p><b>STORY</b> — three districts, bosses, full progression.<br/><b>SURVIVAL</b> — endless waves and run-defining upgrades.<br/><b>BOSS RUSH</b> — five elites in sequence.<br/><b>RAMPAGE</b> — ten waves of score attack.<br/><b>TRAINING</b> — invincible sandbox for combo lab.</p>
+            <div class="help-warning">LOCAL CO-OP // connect gamepads and raise squad size before launch. Online co-op uses a room code.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="boot" class="boot">
+      <div class="boot-mark">SR</div>
+      <div class="boot-bar"><i></i></div>
+      <span>WAKING THE CITY</span>
+    </div>
+  </div>
+
+  <script src="vendor/peerjs.min.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
